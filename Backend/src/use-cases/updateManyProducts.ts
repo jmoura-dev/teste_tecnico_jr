@@ -27,7 +27,7 @@ export class UpdateManyProductsUseCase {
     const newListProductsFiltered = [...products]
     let currentProduct
 
-    for (const obj of filteredNotNullPacks) {
+    for await (const obj of filteredNotNullPacks) {
       if (obj) {
         const codeProduct = Number(obj.product!.code) // código do produto
         const qty = Number(obj.qty)
@@ -53,6 +53,7 @@ export class UpdateManyProductsUseCase {
       }
     }
 
+    console.log(newListProductsFiltered)
     await Promise.all(
       newListProductsFiltered.map(async (product) => {
         const productsFound = await this.productsRepository.findByCode(
@@ -86,7 +87,6 @@ export class UpdateManyProductsUseCase {
         }
 
         if (productsFound.pack && productsFound.pack.length > 0) {
-          const totalPriceProduct = Number(productsFound.sales_price)
           const packItems = await Promise.all(
             productsFound.pack.map(async (packItem) => {
               const packProduct = await this.productsRepository.findByCode(
@@ -97,9 +97,24 @@ export class UpdateManyProductsUseCase {
                   `Produto no pack com o código ${packItem.product_id} não encontrado.`,
                 )
               }
+
+              let totalPrice
+              console.log(typeof productsFound)
+              const arrayProductsFound = [{ ...productsFound }]
+
+              for (const productItem of arrayProductsFound) {
+                const code = Number(productItem.code)
+                const matchingItem = newListProductsFiltered.find(
+                  (item) => item.product_code === code,
+                )
+                if (matchingItem) {
+                  totalPrice = matchingItem.new_price
+                }
+              }
+
               const product_code = Number(packProduct!.code)
               const new_price = Number(
-                (Number(totalPriceProduct) / Number(packItem.qty)).toFixed(2),
+                (Number(totalPrice) / Number(packItem.qty)).toFixed(2),
               )
 
               return { product_code, new_price }
@@ -107,8 +122,8 @@ export class UpdateManyProductsUseCase {
           )
 
           newListProductsFiltered.push(...packItems)
+          console.log('3')
         }
-
         return productsFound
       }),
     )
@@ -148,13 +163,15 @@ export class UpdateManyProductsUseCase {
 
       throw new Error(errorMessages)
     }
+    console.log(newListProductsFiltered)
 
-    const productsArray = Promise.all(
-      newListProductsFiltered.map((product) =>
-        this.productsRepository.updateManyProducts(
-          product.product_code,
-          product.new_price,
-        ),
+    const productsArray = await Promise.all(
+      newListProductsFiltered.map(
+        async (product) =>
+          await this.productsRepository.updateManyProducts(
+            product.product_code,
+            product.new_price,
+          ),
       ),
     )
 
