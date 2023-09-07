@@ -1,22 +1,20 @@
 import { Request, Response } from 'express'
 import { Readable } from 'stream'
 import readLine from 'readline'
-import { makeUpdateManyProducts } from '@/use-cases/factories/make-update-many-products'
+import { makeValidatedProductsUseCase } from '@/use-cases/factories/make-validated-products'
 
 export interface ProductsImport {
   product_code: number
   new_price: number
 }
 
-export async function upload(request: Request, response: Response) {
+export async function validate(request: Request, response: Response) {
   const { file } = request
   const buffer = file?.buffer
 
   const readableFile = new Readable()
   readableFile.push(buffer)
   readableFile.push(null)
-  console.log(file)
-  console.log(buffer)
 
   const productsLine = readLine.createInterface({
     input: readableFile,
@@ -37,17 +35,13 @@ export async function upload(request: Request, response: Response) {
     })
   }
 
-  try {
-    const updateManyProducts = makeUpdateManyProducts()
+  const validatedProducts = makeValidatedProductsUseCase()
 
-    await updateManyProducts.execute(products)
+  const data = await validatedProducts.execute(products)
 
-    return response.status(200).json()
-  } catch (err) {
-    if (err instanceof Error) {
-      return response.status(404).json({ message: err.message })
-    }
+  const validateTypeBigint = JSON.stringify(data, (_key, value) =>
+    typeof value === 'bigint' ? Number(value) : value,
+  )
 
-    throw err
-  }
+  return response.status(200).send(validateTypeBigint)
 }

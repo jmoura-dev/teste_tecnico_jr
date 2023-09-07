@@ -8,7 +8,7 @@ export interface ProductsProps {
   pack: {
     id: bigint
     pack_id: bigint
-    product_id: number
+    product_id: bigint
     qty: bigint
   }[]
 }
@@ -22,9 +22,9 @@ export interface FetchManyProducts {
 
 export interface ProductsRepository {
   fetchManyProducts(): Promise<FetchManyProducts[]>
-  findByCode(code: number): Promise<ProductsProps | null>
+  findByCode(code: bigint): Promise<ProductsProps | null>
   updateManyProducts(
-    product_code: number,
+    product_code: bigint,
     new_price: number,
   ): Promise<ProductsProps>
 }

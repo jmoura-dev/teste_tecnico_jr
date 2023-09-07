@@ -1,4 +1,4 @@
-import { ProductsImport } from '@/http/controllers/upload-products'
+import { ProductsImport } from '@/http/controllers/products/upload-products'
 import { PacksRepository } from '@/repositories/packsRepository'
 import { ProductsRepository } from '@/repositories/productsRepository'
 
@@ -14,7 +14,6 @@ export class UpdateManyProductsUseCase {
       product_code: BigInt(product.product_code),
     }))
 
-    const errors: string[] = []
     const selectedPacks = await Promise.all(
       productsWithCodeBigint.map(async (product) => {
         const packFound = await this.packsRepository.findByProductId(
@@ -24,7 +23,7 @@ export class UpdateManyProductsUseCase {
       }),
     )
     const filteredNotNullPacks = selectedPacks.filter((item) => item !== null)
-    const newListProductsFiltered = [...products]
+    const newListProductsFiltered = [...productsWithCodeBigint]
     let currentProduct
 
     for await (const obj of filteredNotNullPacks) {
@@ -34,7 +33,7 @@ export class UpdateManyProductsUseCase {
 
         // Encontre o índice produto atual na lista de produtos
         const productIndex = newListProductsFiltered.findIndex(
-          (item) => item.product_code === codeProduct,
+          (item) => item.product_code === BigInt(codeProduct),
         )
         if (productIndex !== -1) {
           currentProduct = newListProductsFiltered[productIndex]
@@ -44,7 +43,7 @@ export class UpdateManyProductsUseCase {
         const new_price = Number(
           String((currentProduct!.new_price * qty).toFixed(2)),
         )
-        const product_code = Number(obj.pack_id)
+        const product_code = obj.pack_id
 
         newListProductsFiltered.push({
           product_code,
@@ -53,7 +52,6 @@ export class UpdateManyProductsUseCase {
       }
     }
 
-    console.log(newListProductsFiltered)
     await Promise.all(
       newListProductsFiltered.map(async (product) => {
         const productsFound = await this.productsRepository.findByCode(
@@ -61,29 +59,7 @@ export class UpdateManyProductsUseCase {
         )
 
         if (!productsFound) {
-          errors.push(
-            `Produto com o código ${product.product_code} não encontrado.`,
-          )
           return null
-        }
-
-        const costPrice = Number(productsFound.cost_price)
-        const currentPrice = Number(productsFound.sales_price)
-        const newPrice = Number(product.new_price)
-
-        const upperLimit = currentPrice * 1.1
-        const lowerLimit = currentPrice * 0.9
-
-        if (newPrice < costPrice) {
-          errors.push(
-            `Preço de venda não pode ser inferior ao de compra. CÓDIGO DO ITEM: ${productsFound?.code}`,
-          )
-        }
-
-        if (newPrice < lowerLimit || newPrice > upperLimit) {
-          errors.push(
-            `O reajuste não pode ser maior ou menor que 10% do valor atual. CÓDIGO DO ITEM: ${productsFound.code}`,
-          )
         }
 
         if (productsFound.pack && productsFound.pack.length > 0) {
@@ -92,27 +68,21 @@ export class UpdateManyProductsUseCase {
               const packProduct = await this.productsRepository.findByCode(
                 packItem.product_id,
               )
-              if (!packProduct) {
-                errors.push(
-                  `Produto no pack com o código ${packItem.product_id} não encontrado.`,
-                )
-              }
 
               let totalPrice
-              console.log(typeof productsFound)
               const arrayProductsFound = [{ ...productsFound }]
 
               for (const productItem of arrayProductsFound) {
                 const code = Number(productItem.code)
                 const matchingItem = newListProductsFiltered.find(
-                  (item) => item.product_code === code,
+                  (item) => item.product_code === BigInt(code),
                 )
                 if (matchingItem) {
                   totalPrice = matchingItem.new_price
                 }
               }
 
-              const product_code = Number(packProduct!.code)
+              const product_code = packProduct!.code
               const new_price = Number(
                 (Number(totalPrice) / Number(packItem.qty)).toFixed(2),
               )
@@ -122,48 +92,10 @@ export class UpdateManyProductsUseCase {
           )
 
           newListProductsFiltered.push(...packItems)
-          console.log('3')
         }
         return productsFound
       }),
     )
-
-    function findDuplicateProductCodes(array: ProductsImport[]): string[] {
-      // Verifica se existem produtos repetidos no update
-      const seenProductCodes = new Set()
-      const duplicateProductCodes: string[] = []
-
-      for (const item of array) {
-        const productCode = item.product_code
-
-        if (seenProductCodes.has(productCode)) {
-          if (!duplicateProductCodes.includes(String(productCode))) {
-            duplicateProductCodes.push(String(productCode))
-          }
-        } else {
-          seenProductCodes.add(productCode)
-        }
-      }
-
-      return duplicateProductCodes
-    }
-
-    const duplicateProductCodes = findDuplicateProductCodes(products)
-
-    if (Object.keys(duplicateProductCodes).length > 0) {
-      errors.push(
-        `Não é possível modificar o itens duas vezes ao mesmo tempo, CÓDIGO DOS ITENS DUPLICADOS: ${duplicateProductCodes.join(
-          ', ',
-        )}`,
-      )
-    }
-
-    if (errors.length > 0) {
-      const errorMessages = errors.join('; ')
-
-      throw new Error(errorMessages)
-    }
-    console.log(newListProductsFiltered)
 
     const productsArray = await Promise.all(
       newListProductsFiltered.map(

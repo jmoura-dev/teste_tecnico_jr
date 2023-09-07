@@ -21,7 +21,7 @@ export class PrismaProductsRepository implements ProductsRepository {
     return product
   }
 
-  async updateManyProducts(product_code: number, new_price: number) {
+  async updateManyProducts(product_code: bigint, new_price: number) {
     const product = await prisma.product.update({
       where: {
         code: product_code,
