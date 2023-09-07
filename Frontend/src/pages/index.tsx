@@ -3,19 +3,33 @@ import { useState } from 'react'
 import { api } from './api/api'
 
 export default function Home() {
-  const [selectedFile, setSelectedFile] = useState('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   async function handleToSendFile() {
     const formData = new FormData()
-    formData.append('file', selectedFile)
+    if (selectedFile) {
+      formData.append('file', selectedFile)
+    }
 
-    const response = await api.patch('/upload', formData)
+    const response = await api.patch('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
     console.log(response.data)
   }
 
   return (
     <HomeContainer>
-      {/* <input type="file" onChange={(e) => setSelectedFile(e.target.files[0])} /> */}
+      <input
+        type="file"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) {
+            setSelectedFile(file)
+          }
+        }}
+      />
       <button onClick={handleToSendFile}>Enviar Arquivo</button>
     </HomeContainer>
   )
