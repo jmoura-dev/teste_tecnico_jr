@@ -1,4 +1,4 @@
-import { ProductsImport } from '@/http/controllers/productsRoutes'
+import { ProductsImport } from '@/http/controllers/upload-products'
 import { PacksRepository } from '@/repositories/packsRepository'
 import { ProductsRepository } from '@/repositories/productsRepository'
 
