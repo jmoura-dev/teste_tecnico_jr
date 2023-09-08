@@ -132,6 +132,8 @@ export class ValidatedProductsUseCase {
       }),
     )
 
+    console.log(newListProductsFiltered)
+
     function findDuplicateProductCodes(array: ArrayDuplicateProps[]): string[] {
       // Verifica se existem produtos repetidos no update
       const seenProductCodes = new Set()
