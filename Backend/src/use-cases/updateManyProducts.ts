@@ -22,35 +22,39 @@ export class UpdateManyProductsUseCase {
         return packFound
       }),
     )
+
     const filteredNotNullPacks = selectedPacks.filter((item) => item !== null)
     const newListProductsFiltered = [...productsWithCodeBigint]
-    let currentProduct
 
-    for await (const obj of filteredNotNullPacks) {
-      if (obj) {
-        const codeProduct = Number(obj.product!.code) // código do produto
-        const qty = Number(obj.qty)
+    const result = await Promise.all(
+      filteredNotNullPacks.map(async (item) => {
+        return await this.productsRepository.findByCode(item!.pack_id)
+      }),
+    )
 
-        // Encontre o índice produto atual na lista de produtos
-        const productIndex = newListProductsFiltered.findIndex(
-          (item) => item.product_code === BigInt(codeProduct),
-        )
-        if (productIndex !== -1) {
-          currentProduct = newListProductsFiltered[productIndex]
-          newListProductsFiltered.splice(productIndex, 1)
+    const extractedData = result.flatMap((item) => {
+      return item?.pack.map((packItem) => ({
+        code: item.code,
+        salesPrice: item.sales_price,
+        id: packItem.product_id,
+        qty: packItem.qty,
+      }))
+    })
+
+    const uniqueIds = [...new Set(extractedData.map((item) => item?.id))]
+
+    const productsToAddNewList = uniqueIds.map((id) => {
+      const entry = extractedData.find((item) => item!.id === id)
+      if (entry) {
+        return {
+          code: entry.code,
+          salesPrice: entry.salesPrice,
+          id: entry.id,
+          qty: entry.qty,
         }
-
-        const new_price = Number(
-          String((currentProduct!.new_price * qty).toFixed(2)),
-        )
-        const product_code = obj.pack_id
-
-        newListProductsFiltered.push({
-          product_code,
-          new_price,
-        })
       }
-    }
+      return null
+    })
 
     await Promise.all(
       newListProductsFiltered.map(async (product) => {
@@ -63,28 +67,22 @@ export class UpdateManyProductsUseCase {
         }
 
         if (productsFound.pack && productsFound.pack.length > 0) {
+          const findProduct = newListProductsFiltered.find(
+            (item) => item.product_code === productsFound.code,
+          )
+
           const packItems = await Promise.all(
             productsFound.pack.map(async (packItem) => {
               const packProduct = await this.productsRepository.findByCode(
                 packItem.product_id,
               )
 
-              let totalPrice
-              const arrayProductsFound = [{ ...productsFound }]
-
-              for (const productItem of arrayProductsFound) {
-                const code = Number(productItem.code)
-                const matchingItem = newListProductsFiltered.find(
-                  (item) => item.product_code === BigInt(code),
-                )
-                if (matchingItem) {
-                  totalPrice = matchingItem.new_price
-                }
-              }
+              const updatePrice =
+                Number(productsFound.sales_price) / findProduct!.new_price
 
               const product_code = packProduct!.code
               const new_price = Number(
-                (Number(totalPrice) / Number(packItem.qty)).toFixed(2),
+                (Number(packProduct?.sales_price) * updatePrice).toFixed(2),
               )
 
               return { product_code, new_price }
@@ -94,6 +92,47 @@ export class UpdateManyProductsUseCase {
           newListProductsFiltered.push(...packItems)
         }
         return productsFound
+      }),
+    )
+
+    await Promise.all(
+      productsToAddNewList.map(async (item) => {
+        const productsToCompare = await this.productsRepository.findByCode(
+          item!.id,
+        )
+        const secondArrayProductsCompare =
+          await this.productsRepository.findByCode(item!.code)
+
+        if (!productsToCompare) {
+          throw new Error('Error')
+        }
+
+        for (const objectItem of productsToAddNewList) {
+          const matchingProduct = secondArrayProductsCompare?.pack.find(
+            (packItem) => packItem.product_id === objectItem?.id,
+          )
+          const newPriceProduct = newListProductsFiltered.find(
+            (item) => item.product_code === matchingProduct?.product_id,
+          )
+
+          if (matchingProduct) {
+            const currentPriceProduct =
+              Number(matchingProduct.qty) *
+              Number(productsToCompare?.sales_price) // valor atual no pack
+            const priceNumber =
+              Number(matchingProduct.qty) * Number(newPriceProduct?.new_price)
+
+            console.log(priceNumber)
+
+            const new_price = priceNumber - currentPriceProduct
+
+            newListProductsFiltered.push({
+              product_code: item!.code,
+              new_price:
+                Number(secondArrayProductsCompare!.sales_price) + new_price,
+            })
+          }
+        }
       }),
     )
 

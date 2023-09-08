@@ -2,8 +2,14 @@ import { prisma } from '@/lib/prisma'
 import { ProductsRepository } from '../productsRepository'
 
 export class PrismaProductsRepository implements ProductsRepository {
-  async fetchManyProducts() {
-    const products = await prisma.product.findMany()
+  async fetchManyProducts(query?: string) {
+    const products = await prisma.product.findMany({
+      where: {
+        name: {
+          contains: query,
+        },
+      },
+    })
 
     return products
   }

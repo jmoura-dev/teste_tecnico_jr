@@ -7,13 +7,17 @@ interface ProductType {
   products: FetchManyProducts[]
 }
 
+interface FetchManyProductsUseCaseRequest {
+  query?: string
+}
+
 export class FetchManyProductsUseCase {
   constructor(private productsRepository: ProductsRepository) {}
 
-  async execute(): Promise<ProductType> {
-    console.log('alo')
-
-    const products = await this.productsRepository.fetchManyProducts()
+  async execute({
+    query,
+  }: FetchManyProductsUseCaseRequest): Promise<ProductType> {
+    const products = await this.productsRepository.fetchManyProducts(query)
 
     return {
       products,

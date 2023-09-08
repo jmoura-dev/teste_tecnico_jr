@@ -21,7 +21,7 @@ export interface FetchManyProducts {
 }
 
 export interface ProductsRepository {
-  fetchManyProducts(): Promise<FetchManyProducts[]>
+  fetchManyProducts(query?: string): Promise<FetchManyProducts[]>
   findByCode(code: bigint): Promise<ProductsProps | null>
   updateManyProducts(
     product_code: bigint,

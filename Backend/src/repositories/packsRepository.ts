@@ -1,6 +1,6 @@
 import { Decimal } from '@prisma/client/runtime/library'
 
-interface PackProps {
+export interface PackProps {
   id: bigint
   pack_id: bigint
   product_id: bigint

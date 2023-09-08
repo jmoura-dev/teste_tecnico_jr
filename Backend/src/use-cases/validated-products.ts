@@ -97,11 +97,16 @@ export class ValidatedProductsUseCase {
         }
 
         if (productsFound.pack && productsFound.pack.length > 0) {
+          const findProduct = newListProductsFiltered.find(
+            (item) => item.product_code === productsFound.code,
+          )
+
           const packItems = await Promise.all(
             productsFound.pack.map(async (packItem) => {
               const packProduct = await this.productsRepository.findByCode(
                 packItem.product_id,
               )
+
               if (!packProduct) {
                 errors.push({
                   error: 'Produto no pack não encontrado.',
@@ -109,22 +114,12 @@ export class ValidatedProductsUseCase {
                 })
               }
 
-              let totalPrice
-              const arrayProductsFound = [{ ...productsFound }]
-
-              for (const productItem of arrayProductsFound) {
-                const code = Number(productItem.code)
-                const matchingItem = newListProductsFiltered.find(
-                  (item) => item.product_code === BigInt(code),
-                )
-                if (matchingItem) {
-                  totalPrice = matchingItem.new_price
-                }
-              }
+              const test =
+                Number(productsFound.sales_price) / findProduct!.new_price
 
               const product_code = packProduct!.code
               const new_price = Number(
-                (Number(totalPrice) / Number(packItem.qty)).toFixed(2),
+                (Number(packProduct?.sales_price) * test).toFixed(2),
               )
 
               return { product_code, new_price }
@@ -162,7 +157,6 @@ export class ValidatedProductsUseCase {
     )
 
     if (Object.keys(duplicateProductCodes).length > 0) {
-      console.log(duplicateProductCodes)
       errors.push({
         error: `Não é possível modificar o item duas vezes ao mesmo tempo. OBS(Basta modificar o valor unitário e o pacote se ajustará. O contrário também é válido). Itens unitários que se repetem: ${duplicateProductCodes}`,
         code: 0,
