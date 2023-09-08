@@ -3,12 +3,11 @@ import { ProductContainer } from './styles'
 interface ProductCardProps {
   name: string
   price: string
-  className: string
 }
 
-export function ProductCard({ name, price, className }: ProductCardProps) {
+export function ProductCard({ name, price }: ProductCardProps) {
   return (
-    <ProductContainer className={className}>
+    <ProductContainer>
       <p>{name}</p>
       <span>{price}</span>
     </ProductContainer>

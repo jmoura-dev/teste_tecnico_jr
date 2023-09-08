@@ -19,4 +19,17 @@ export const HomeContainer = styled('div', {
       fontSize: '3rem',
     },
   },
+
+  ul: {
+    borderRadius: 8,
+    cursor: 'pointer',
+    position: 'relative',
+    maxWidth: '70rem',
+    display: 'flex',
+    alignItems: 'center',
+    overflow: 'auto',
+    gap: '1rem',
+    padding: '0 1rem',
+    margin: '0 auto',
+  },
 })

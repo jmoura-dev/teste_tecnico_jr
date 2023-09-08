@@ -27,6 +27,7 @@ export default function Import() {
     ProductsToUpdateProps[]
   >([])
   const [errors, setErrors] = useState<ErrorsProps[]>([])
+  console.log(selectedFile)
 
   useEffect(() => {
     if (errors.length > 0) {
@@ -37,8 +38,6 @@ export default function Import() {
       )
     }
   }, [errors])
-
-  console.log(otherErrors)
 
   useEffect(() => {
     if (
@@ -64,6 +63,7 @@ export default function Import() {
     setOpenModelProducts(false)
     setProductsToUpdate([])
     setErrors([])
+    setOtherErrors([])
   }
 
   async function handleToValidateFile() {
@@ -102,6 +102,7 @@ export default function Import() {
 
       setProductsToUpdate([])
       setErrors([])
+      setOtherErrors([])
       setSelectedFile(null)
       setOpenModelProducts(false)
       return alert('Produtos atualizados com sucesso!')
@@ -128,6 +129,7 @@ export default function Import() {
             if (file) {
               setSelectedFile(file)
             }
+            setOtherErrors([])
             setDisableButtonUpdate(true)
           }}
         />

@@ -121,6 +121,27 @@ export const SectionContainer = styled('section', {
   maxWidth: 1000,
   animation: `${topDown} 0.3s linear`,
 
+  footer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    margin: '0 auto',
+    gap: '1rem',
+    background: '$gray800',
+    padding: '0.5rem 1rem',
+    borderRadius: 6,
+
+    ul: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'column',
+      gap: '0.5rem',
+      color: 'red',
+    },
+  },
+
   '> button': {
     background: 'transparent',
     width: 10,
