@@ -21,3 +21,9 @@
 - [x] - Caso uma ou mais regras de validação tenham sido quebradas, o sistema também deve exibir ao lado de cada produto qual regra foi quebrada.
 - [x] - O sistema também deve ter um botão ATUALIZAR. Que só ficará habilitado se todos os produtos dos arquivos estiverem validados e sem regras quebradas
 - [x] - Ao clica em ATUALIZAR, o sistema deve salvar o novo preço no banco de dados e já deixar a tela pronta para o envio de um novo arquivo.
+
+## Importante:
+- Será necessário criar um arquivo .env na raiz do projeto Backend e configurá-lo com o seguintes dados:
+
+PORT="portadesejada" => exemplo: PORT=3333
+DATABASE_URL="mysql://usuário:password@localhost:3306/nomedobanco => exemplo: DATABASE_URL="mysql://root:senha123@localhost:3306/mysql.schema
