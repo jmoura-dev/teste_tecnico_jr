@@ -36,4 +36,5 @@ DATABASE_URL="mysql://usuário:password@localhost:3306/nomedobanco => exemplo: D
 **OBS**: - Caso altere a porta backend, será necessário alterar o arquivo api do frontend de acordo com a porta backend desejada;
 
 ## Informações:
-**Para ver as imagens e regras de negócio, acessar os repositórios em específico**.
+**É necessário estar com o banco de dados rodando para que a aplicação funcione**;
+**Para ver as imagens e regras de negócio, acessar os repositórios em específico**;.
