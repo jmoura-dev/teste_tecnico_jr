@@ -37,7 +37,7 @@ export default function Home() {
                 <ProductCard
                   name={product.name}
                   key={index}
-                  price={String(product.sales_price).padEnd(2, '0')}
+                  price={`R$ ${product.sales_price}`}
                 />
               )
             })}
