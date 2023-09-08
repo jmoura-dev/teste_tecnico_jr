@@ -1,6 +1,6 @@
 # Upload arquivo csv
 
-## 💡 About
+## 💡 Sobre
 
 ### Tecnologias:
 #### Backend - **Nodejs**, **Express**, **Zod**, **Typescript**, **Dependency inversion**, **Factories Patterns**, **Streams**;
@@ -11,7 +11,7 @@
 ### Frontend:
 - **Next**, **Reactjs**, **Typescript**, **Hooks**, **Axios**;
 
-## 📁 Project
+## 📁 Projeto
 
 - Criar uma aplicação FullStack que consiste em atualizar vários produtos de uma única vez por meio de um arquivo csv enviado no frontend e tratado no backend com suas validações;
 
