@@ -1,36 +1,60 @@
+import { ProductCard } from '@/components/ProductCard'
 import { HomeContainer } from '@/styles/pages/home'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { api } from './api/api'
+import { Header } from '@/components/Header'
+
+import { useKeenSlider } from 'keen-slider/react'
+import 'keen-slider/keen-slider.min.css'
+
+interface ProductsProps {
+  name: string
+  sales_price: string
+}
 
 export default function Home() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [sliderRef] = useKeenSlider({
+    slides: {
+      perView: 4,
+      spacing: 48,
+    },
+  })
+  const [productsArray, setProductsArray] = useState<ProductsProps[]>([])
+  const [search, setSearch] = useState<string>('')
 
-  async function handleToSendFile() {
-    const formData = new FormData()
-    if (selectedFile) {
-      formData.append('file', selectedFile)
+  useEffect(() => {
+    async function fetchProducts() {
+      const response = await api.get('/') // ?product=${}
+      setProductsArray(response.data.products)
     }
+    fetchProducts()
+  }, [productsArray.length])
 
-    const response = await api.patch('/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
-    console.log(response.data)
-  }
+  console.log(productsArray)
 
   return (
     <HomeContainer>
-      <input
-        type="file"
-        onChange={(e) => {
-          const file = e.target.files?.[0]
-          if (file) {
-            setSelectedFile(file)
-          }
-        }}
-      />
-      <button onClick={handleToSendFile}>Enviar Arquivo</button>
+      <Header />
+      <header>
+        <h1>Shopper</h1>
+        <p>Seu supermercado online</p>
+      </header>
+
+      <main>
+        <ul ref={sliderRef} className="keen-slider">
+          {productsArray.length > 0 &&
+            productsArray.map((product, index) => {
+              return (
+                <ProductCard
+                  className="keen-slider_slide"
+                  name={product.name}
+                  key={index}
+                  price={String(product.sales_price).padEnd(2, '0')}
+                />
+              )
+            })}
+        </ul>
+      </main>
     </HomeContainer>
   )
 }
