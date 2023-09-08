@@ -17,7 +17,7 @@
 
 ## 👨🏽‍💻 Para usar:
 
-### Execute os seguintes passos:
+### Execute os seguintes passos no terminal do seu editor de códigos (VScode):
 - git clone https://github.com/jmoura-dev/teste_tecnico_jr.git
 - cd Backend
 - npm i / yarn
