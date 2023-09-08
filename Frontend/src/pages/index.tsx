@@ -24,17 +24,15 @@ export default function Home() {
 
   useEffect(() => {
     async function fetchProducts() {
-      const response = await api.get('/') // ?product=${}
+      const response = await api.get(`products?query=${search}`)
       setProductsArray(response.data.products)
     }
     fetchProducts()
-  }, [productsArray.length])
-
-  console.log(productsArray)
+  }, [search])
 
   return (
     <HomeContainer>
-      <Header />
+      <Header onChange={(e) => setSearch(e.target.value)} />
       <header>
         <h1>Shopper</h1>
         <p>Seu supermercado online</p>

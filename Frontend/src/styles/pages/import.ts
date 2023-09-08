@@ -5,12 +5,34 @@ const topDown = keyframes({
   '100%': { opacity: '1', transform: 'translateY(0)' },
 })
 
+const degOpacity = keyframes({
+  '0%': { opacity: '0' },
+  '100%': { opacity: '1' },
+})
+
 export const ImportContainer = styled('div', {
+  position: 'relative',
   display: 'flex',
   flexDirection: 'column',
+  justifyContent: 'center',
   alignItems: 'center',
-  margin: '0 auto',
+  margin: 'auto',
   width: '100%',
+  minHeight: '100vh',
+  animation: `${degOpacity} 0.2s linear`,
+
+  '> a': {
+    position: 'absolute',
+    top: '20%',
+    left: '20%',
+    color: '$green300',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '$md',
+    fontWeight: 'bold',
+    textDecoration: 'none',
+  },
 
   div: {
     display: 'flex',
@@ -100,7 +122,7 @@ export const SectionContainer = styled('section', {
   animation: `${topDown} 0.3s linear`,
 
   '> button': {
-    background: 'none',
+    background: 'transparent',
     width: 10,
     position: 'absolute',
     top: '5%',

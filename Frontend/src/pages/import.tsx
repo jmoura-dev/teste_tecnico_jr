@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { api } from './api/api'
 import { ImportContainer, SectionContainer } from '@/styles/pages/import'
-import { CheckCircle, X } from 'phosphor-react'
+import { ArrowLeft, CheckCircle, X } from 'phosphor-react'
+import Link from 'next/link'
 
 interface ErrorsProps {
   error: string
@@ -20,6 +21,7 @@ export default function Import() {
   const [doesItemSelected, setDoesItemSelected] = useState<boolean>(true)
   const [disableButtonUpdate, setDisableButtonUpdate] = useState<boolean>(true)
   const [openModelProducts, setOpenModelProducts] = useState<boolean>(false)
+  const [otherErrors, setOtherErrors] = useState<ErrorsProps[]>([])
 
   const [productsToUpdate, setProductsToUpdate] = useState<
     ProductsToUpdateProps[]
@@ -27,12 +29,28 @@ export default function Import() {
   const [errors, setErrors] = useState<ErrorsProps[]>([])
 
   useEffect(() => {
-    if (errors.length === 0 && productsToUpdate.length > 1) {
+    if (errors.length > 0) {
+      setOtherErrors(
+        errors.filter((itemError) => {
+          return itemError.code === 0
+        }),
+      )
+    }
+  }, [errors])
+
+  console.log(otherErrors)
+
+  useEffect(() => {
+    if (
+      errors.length === 0 &&
+      productsToUpdate.length > 1 &&
+      otherErrors.length === 0
+    ) {
       setDisableButtonUpdate(false)
     } else {
       setDisableButtonUpdate(true)
     }
-  }, [errors, productsToUpdate])
+  }, [errors, productsToUpdate, otherErrors])
 
   useEffect(() => {
     if (selectedFile === null) {
@@ -46,7 +64,6 @@ export default function Import() {
     setOpenModelProducts(false)
     setProductsToUpdate([])
     setErrors([])
-    setSelectedFile(null)
   }
 
   async function handleToValidateFile() {
@@ -56,7 +73,7 @@ export default function Import() {
         formData.append('file', selectedFile)
       }
 
-      const response = await api.post('validate', formData, {
+      const response = await api.post('products/validate', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -77,7 +94,7 @@ export default function Import() {
         formData.append('file', selectedFile)
       }
 
-      await api.put('update', formData, {
+      await api.put('products/update', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -95,6 +112,11 @@ export default function Import() {
 
   return (
     <ImportContainer>
+      <Link href="/">
+        {' '}
+        <ArrowLeft weight="bold" size={22} /> Voltar
+      </Link>
+
       <div>
         <h2>Upload arquivo csv</h2>
 
@@ -156,6 +178,21 @@ export default function Import() {
                 })}
               </tbody>
             </table>
+
+            <footer>
+              <h2>Outro erros</h2>
+              {otherErrors.length > 0 && (
+                <ul>
+                  {otherErrors.map((erro, index) => {
+                    return (
+                      <span key={erro.code}>{`${index + 1} - ${
+                        erro.error
+                      }`}</span>
+                    )
+                  })}
+                </ul>
+              )}
+            </footer>
           </SectionContainer>
           <button
             title="Botão para atualizar"

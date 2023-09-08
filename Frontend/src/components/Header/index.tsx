@@ -1,8 +1,13 @@
 import Link from 'next/link'
 import { Content, HeaderContainer, WelcomeContainer } from './styles'
 import { ShoppingCart } from 'phosphor-react'
+import { ChangeEvent } from 'react'
 
-export function Header() {
+interface HeaderProps {
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void
+}
+
+export function Header({ onChange }: HeaderProps) {
   return (
     <HeaderContainer>
       <Content>
@@ -18,6 +23,7 @@ export function Header() {
           type="text"
           placeholder="Filtro por nome"
           title="Filtro por nome"
+          onChange={onChange}
         />
 
         <Link href="import">Importar arquivos</Link>
